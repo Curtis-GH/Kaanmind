@@ -4,8 +4,9 @@
 from django.urls import path
 
 # 2. Local
-from .views import RegistrationView
+from .views import LoginView, RegistrationView
 
 urlpatterns = [
     path('registration/', RegistrationView.as_view(), name='registration'),
+    path('login/', LoginView.as_view(), name='login'),
 ]
