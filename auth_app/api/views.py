@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # 2. Local
-from .serializers import RegistrationSerializer
+from .serializers import LoginSerializer, RegistrationSerializer
 
 
 def build_auth_data(user):
@@ -34,3 +34,17 @@ class RegistrationView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(build_auth_data(user), status=status.HTTP_201_CREATED)
+
+
+class LoginView(APIView):
+    """Check the credentials and return a token."""
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """Log a user in (200) or report invalid data (400)."""
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        return Response(build_auth_data(user), status=status.HTTP_200_OK)
