@@ -1,0 +1,8 @@
+[flake8]
+exclude =
+    venv,
+    .venv,
+    migrations,
+    __pycache__
+per-file-ignores =
+    core/settings.py: E501
