@@ -38,14 +38,21 @@ The frontend is **not** part of this repository.
    The project does not load a `.env` file by itself. Export the values in
    your shell before starting the server.
 
-5. Create the database and start the server:
+5. Create the database, the guest user and start the server:
 
    ```bash
    python manage.py migrate
+   python manage.py create_guest_user
    python manage.py runserver
    ```
 
 The API is available at `http://127.0.0.1:8000/api/`.
+
+## Guest user
+
+The frontend has a guest login button with fixed credentials. The command
+`python manage.py create_guest_user` creates this user (email
+`kevin@kovacsi.de`). Running it more than once changes nothing.
 
 ## Frontend and CORS
 
