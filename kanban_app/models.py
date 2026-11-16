@@ -66,3 +66,23 @@ class Task(models.Model):
     def __str__(self):
         """Show the title of the task."""
         return self.title
+
+
+class Comment(models.Model):
+    """A comment that a user wrote on a task."""
+
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
+        ordering = ['created_at']
+
+    def __str__(self):
+        """Show who wrote the comment and on which task."""
+        return f'{self.author} on {self.task}'
