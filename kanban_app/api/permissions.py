@@ -20,3 +20,20 @@ class IsBoardOwner(BasePermission):
     def has_object_permission(self, request, view, board):
         """Check if the user owns the board."""
         return board.owner == request.user
+
+
+class IsTaskBoardMember(BasePermission):
+    """Allow only people who belong to the board of the task."""
+
+    def has_object_permission(self, request, view, task):
+        """Check if the user belongs to the board of the task."""
+        return IsBoardMember().has_object_permission(
+            request, view, task.board)
+
+
+class IsTaskCreatorOrBoardOwner(BasePermission):
+    """Allow the creator of a task and the owner of its board."""
+
+    def has_object_permission(self, request, view, task):
+        """Check if the user created the task or owns the board."""
+        return request.user in (task.created_by, task.board.owner)
