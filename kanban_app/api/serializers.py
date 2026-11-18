@@ -114,3 +114,50 @@ class BoardUpdateSerializer(serializers.ModelSerializer):
         if members is not None:
             board.members.set(members + [board.owner])
         return board
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    """Create and show tasks with nested people and comment counter."""
+
+    assignee = UserSerializer(read_only=True)
+    reviewer = UserSerializer(read_only=True)
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        source='assignee', queryset=User.objects.all(),
+        write_only=True, required=False, allow_null=True)
+    reviewer_id = serializers.PrimaryKeyRelatedField(
+        source='reviewer', queryset=User.objects.all(),
+        write_only=True, required=False, allow_null=True)
+    comments_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Task
+        fields = ['id', 'board', 'title', 'description', 'status',
+                  'priority', 'assignee', 'reviewer', 'assignee_id',
+                  'reviewer_id', 'due_date', 'comments_count']
+
+    def get_comments_count(self, task):
+        """Count the comments of the task."""
+        return task.comments.count()
+
+    def get_board(self, attrs):
+        """Return the board of the new or the changed task."""
+        return attrs.get('board') or self.instance.board
+
+    def validate(self, attrs):
+        """Assignee and reviewer must be members of the board."""
+        board = self.get_board(attrs)
+        for role in ('assignee', 'reviewer'):
+            person = attrs.get(role)
+            if person and not board.members.filter(pk=person.pk).exists():
+                raise serializers.ValidationError(
+                    {f'{role}_id': 'The user is not a member of the board.'})
+        return attrs
+
+
+class TaskUpdateSerializer(TaskSerializer):
+    """Change a task; the board cannot be moved."""
+
+    class Meta(TaskSerializer.Meta):
+        fields = ['id', 'title', 'description', 'status', 'priority',
+                  'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
+                  'due_date']

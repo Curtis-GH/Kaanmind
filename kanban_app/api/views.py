@@ -3,17 +3,22 @@
 # 1. Third-party
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # 2. Local
-from kanban_app.models import Board
-from .permissions import IsBoardMember, IsBoardOwner
+from kanban_app.models import Board, Task
+from .permissions import (
+    IsBoardMember, IsBoardOwner, IsTaskBoardMember,
+    IsTaskCreatorOrBoardOwner)
 from .serializers import (
     BoardDetailSerializer, BoardListSerializer, BoardUpdateSerializer,
-    EmailCheckSerializer, UserSerializer)
+    EmailCheckSerializer, TaskSerializer, TaskUpdateSerializer,
+    UserSerializer)
 
 
 class BoardListView(generics.ListCreateAPIView):
@@ -63,3 +68,61 @@ class EmailCheckView(APIView):
         if user is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(UserSerializer(user).data)
+
+
+class TaskCreateView(generics.CreateAPIView):
+    """Create a task on a board where the user is a member."""
+
+    serializer_class = TaskSerializer
+
+    def check_board_access(self, board_id):
+        """Answer 404 for an unknown board and 403 for a stranger."""
+        if not str(board_id).isdigit():
+            raise ValidationError({'board': 'A valid board id is needed.'})
+        board = get_object_or_404(Board, pk=board_id)
+        if not IsBoardMember().has_object_permission(
+                self.request, self, board):
+            raise PermissionDenied('You are not a member of this board.')
+
+    def create(self, request, *args, **kwargs):
+        """Check the board first, then create the task."""
+        self.check_board_access(request.data.get('board'))
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        """Remember who created the task."""
+        serializer.save(created_by=self.request.user)
+
+
+class TaskDetailView(generics.UpdateAPIView, generics.DestroyAPIView):
+    """Change or delete one task."""
+
+    queryset = Task.objects.all()
+    serializer_class = TaskUpdateSerializer
+    http_method_names = ['patch', 'delete']
+
+    def get_permissions(self):
+        """Members may change, creator and board owner may delete."""
+        if self.request.method == 'DELETE':
+            return [IsAuthenticated(), IsTaskCreatorOrBoardOwner()]
+        return [IsAuthenticated(), IsTaskBoardMember()]
+
+
+class AssignedTasksView(generics.ListAPIView):
+    """List the tasks that are assigned to the user."""
+
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        """Return tasks where the user is the assignee."""
+        return Task.objects.filter(assignee=self.request.user)
+
+
+class ReviewingTasksView(generics.ListAPIView):
+    """List the tasks that the user has to review."""
+
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        """Return tasks where the user is the reviewer."""
+        return Task.objects.filter(reviewer=self.request.user)
