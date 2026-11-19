@@ -14,6 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
     fullname = serializers.CharField(source='first_name', read_only=True)
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = User
         fields = ['id', 'email', 'fullname']
 
@@ -32,6 +34,8 @@ class BoardTaskSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = Task
         fields = ['id', 'title', 'description', 'status', 'priority',
                   'assignee', 'reviewer', 'due_date', 'comments_count']
@@ -54,6 +58,8 @@ class BoardListSerializer(serializers.ModelSerializer):
     owner_id = serializers.IntegerField(read_only=True)
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = Board
         fields = ['id', 'title', 'members', 'member_count', 'ticket_count',
                   'tasks_to_do_count', 'tasks_high_prio_count', 'owner_id']
@@ -90,6 +96,8 @@ class BoardDetailSerializer(serializers.ModelSerializer):
     tasks = BoardTaskSerializer(many=True, read_only=True)
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = Board
         fields = ['id', 'title', 'owner_id', 'members', 'tasks']
 
@@ -104,6 +112,8 @@ class BoardUpdateSerializer(serializers.ModelSerializer):
         source='members', many=True, read_only=True)
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = Board
         fields = ['id', 'title', 'members', 'owner_data', 'members_data']
 
@@ -130,6 +140,8 @@ class TaskSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = Task
         fields = ['id', 'board', 'title', 'description', 'status',
                   'priority', 'assignee', 'reviewer', 'assignee_id',
@@ -158,6 +170,8 @@ class TaskUpdateSerializer(TaskSerializer):
     """Change a task; the board cannot be moved."""
 
     class Meta(TaskSerializer.Meta):
+        """Model and fields of the serializer."""
+
         fields = ['id', 'title', 'description', 'status', 'priority',
                   'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
                   'due_date']
@@ -170,5 +184,7 @@ class CommentSerializer(serializers.ModelSerializer):
         source='author.first_name', read_only=True)
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = Comment
         fields = ['id', 'created_at', 'author', 'content']

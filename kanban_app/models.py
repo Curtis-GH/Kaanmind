@@ -15,6 +15,8 @@ class Board(models.Model):
         User, related_name='boards', blank=True)
 
     class Meta:
+        """Display names and ordering of the model."""
+
         verbose_name = 'Board'
         verbose_name_plural = 'Boards'
         ordering = ['title']
@@ -59,6 +61,8 @@ class Task(models.Model):
         related_name='created_tasks')
 
     class Meta:
+        """Display names and ordering of the model."""
+
         verbose_name = 'Task'
         verbose_name_plural = 'Tasks'
         ordering = ['id']
@@ -79,6 +83,8 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        """Display names and ordering of the model."""
+
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
         ordering = ['created_at']

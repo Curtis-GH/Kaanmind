@@ -14,6 +14,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
     repeated_password = serializers.CharField(write_only=True)
 
     class Meta:
+        """Model and fields of the serializer."""
+
         model = User
         fields = ['fullname', 'email', 'password', 'repeated_password']
         extra_kwargs = {'password': {'write_only': True}}
