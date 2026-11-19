@@ -11,13 +11,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # 2. Local
-from kanban_app.models import Board, Task
+from kanban_app.models import Board, Comment, Task
 from .permissions import (
-    IsBoardMember, IsBoardOwner, IsTaskBoardMember,
-    IsTaskCreatorOrBoardOwner)
+    IsBoardMember, IsBoardOwner, IsCommentAuthor,
+    IsTaskBoardMember, IsTaskCreatorOrBoardOwner)
 from .serializers import (
     BoardDetailSerializer, BoardListSerializer, BoardUpdateSerializer,
-    EmailCheckSerializer, TaskSerializer, TaskUpdateSerializer,
+    CommentSerializer, EmailCheckSerializer, TaskSerializer, TaskUpdateSerializer,
     UserSerializer)
 
 
@@ -126,3 +126,35 @@ class ReviewingTasksView(generics.ListAPIView):
     def get_queryset(self):
         """Return tasks where the user is the reviewer."""
         return Task.objects.filter(reviewer=self.request.user)
+
+
+class CommentListView(generics.ListCreateAPIView):
+    """List the comments of a task or add a new one."""
+
+    serializer_class = CommentSerializer
+
+    def get_task(self):
+        """Find the task; only members of its board may use it."""
+        task = get_object_or_404(Task, pk=self.kwargs['task_id'])
+        if not IsTaskBoardMember().has_object_permission(
+                self.request, self, task):
+            raise PermissionDenied('You are not a member of this board.')
+        return task
+
+    def get_queryset(self):
+        """Return the comments of the task, oldest first."""
+        return self.get_task().comments.all()
+
+    def perform_create(self, serializer):
+        """Set task and author of the new comment."""
+        serializer.save(task=self.get_task(), author=self.request.user)
+
+
+class CommentDeleteView(generics.DestroyAPIView):
+    """Delete a comment; only the author may do it."""
+
+    permission_classes = [IsAuthenticated, IsCommentAuthor]
+
+    def get_queryset(self):
+        """Only comments of the task in the url can be found."""
+        return Comment.objects.filter(task_id=self.kwargs['task_id'])
