@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 # 2. Local
-from kanban_app.models import Board, Task
+from kanban_app.models import Board, Comment, Task
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -161,3 +161,14 @@ class TaskUpdateSerializer(TaskSerializer):
         fields = ['id', 'title', 'description', 'status', 'priority',
                   'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
                   'due_date']
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Show and create comments; the author comes from the token."""
+
+    author = serializers.CharField(
+        source='author.first_name', read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'created_at', 'author', 'content']
