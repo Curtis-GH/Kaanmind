@@ -17,8 +17,8 @@ from .permissions import (
     IsTaskBoardMember, IsTaskCreatorOrBoardOwner)
 from .serializers import (
     BoardDetailSerializer, BoardListSerializer, BoardUpdateSerializer,
-    CommentSerializer, EmailCheckSerializer, TaskSerializer, TaskUpdateSerializer,
-    UserSerializer)
+    CommentSerializer, EmailCheckSerializer, TaskSerializer,
+    TaskUpdateSerializer, UserSerializer)
 
 
 class BoardListView(generics.ListCreateAPIView):
