@@ -24,6 +24,7 @@ from .serializers import (
 class BoardListView(generics.ListCreateAPIView):
     """List the boards of the user or create a new board."""
 
+    permission_classes = [IsAuthenticated]
     serializer_class = BoardListSerializer
 
     def get_queryset(self):
@@ -59,6 +60,8 @@ class BoardDetailView(generics.RetrieveUpdateDestroyAPIView):
 class EmailCheckView(APIView):
     """Find a user by email address."""
 
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         """Return the user with the given email or an error."""
         serializer = EmailCheckSerializer(data=request.query_params)
@@ -73,6 +76,7 @@ class EmailCheckView(APIView):
 class TaskCreateView(generics.CreateAPIView):
     """Create a task on a board where the user is a member."""
 
+    permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
 
     def check_board_access(self, board_id):
@@ -111,6 +115,7 @@ class TaskDetailView(generics.UpdateAPIView, generics.DestroyAPIView):
 class AssignedTasksView(generics.ListAPIView):
     """List the tasks that are assigned to the user."""
 
+    permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -121,6 +126,7 @@ class AssignedTasksView(generics.ListAPIView):
 class ReviewingTasksView(generics.ListAPIView):
     """List the tasks that the user has to review."""
 
+    permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -131,6 +137,7 @@ class ReviewingTasksView(generics.ListAPIView):
 class CommentListView(generics.ListCreateAPIView):
     """List the comments of a task or add a new one."""
 
+    permission_classes = [IsAuthenticated]
     serializer_class = CommentSerializer
 
     def get_task(self):
