@@ -32,6 +32,8 @@ The frontend is **not** part of this repository.
    |---|---|---|
    | `DJANGO_SECRET_KEY` | Secret key of the Django project | insecure dev key |
    | `DJANGO_DEBUG` | `True` or `False` | `True` |
+   | `DJANGO_ALLOWED_HOSTS` | Comma separated host names | `localhost,127.0.0.1` |
+   | `DJANGO_CSRF_TRUSTED_ORIGINS` | Comma separated https origins (production) | empty |
 
    The project does not load a `.env` file by itself. Export the values in
    your shell before starting the server.
@@ -105,6 +107,14 @@ All paths start with `/api/`. Endpoints marked with a lock need the token.
 
 Typical errors: `400` invalid data, `401` no or wrong token, `403` not allowed
 (for example a user who is not a member of the board), `404` not found.
+
+## Deployment (short)
+
+For a server, set `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=False`,
+`DJANGO_ALLOWED_HOSTS` and `DJANGO_CSRF_TRUSTED_ORIGINS`, run
+`python manage.py migrate` and `python manage.py collectstatic`, and start
+the app with `gunicorn core.wsgi`. A web server such as nginx forwards `/api/`
+and `/admin/` to it.
 
 ## Project structure
 
