@@ -15,6 +15,7 @@ db.sqlite3
 
 # Test and coverage output
 .coverage
+staticfiles/
 htmlcov/
 
 # Editor and OS files
